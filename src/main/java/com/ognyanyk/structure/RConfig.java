@@ -1,4 +1,4 @@
-package com.ognyanyk;
+package com.ognyanyk.structure;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
