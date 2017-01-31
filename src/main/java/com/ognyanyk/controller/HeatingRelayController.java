@@ -16,8 +16,6 @@ public class HeatingRelayController extends BaseController {
     private final Logger logger = LoggerFactory.getLogger(HeatingRelayController.class);
 
 
-    final GpioController gpio = GpioFactory.getInstance();
-    GpioPinDigitalMultipurpose relayPin = gpio.provisionDigitalMultipurposePin(RaspiPin.GPIO_00, PinMode.DIGITAL_INPUT);
 
     @Scheduled(fixedRate = 1000)
     public void updateHeating() throws ConfigurationException {
