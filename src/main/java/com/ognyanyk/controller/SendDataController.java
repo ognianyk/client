@@ -2,13 +2,9 @@ package com.ognyanyk.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.util.JSONWrappedObject;
-import com.ognyanyk.structure.RConfig;
-import com.ognyanyk.structure.Report;
-import com.pi4j.io.gpio.PinMode;
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.PropertiesConfiguration;
-import org.mandfer.dht11.DHT11SensorReader;
+import com.ognyanyk.structure.AdditionalSensor;
+import com.ognyanyk.structure.ArduinoTemperatureSensor;
+import com.ognyanyk.structure.TransportJson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,25 +21,46 @@ import org.springframework.web.client.RestTemplate;
 public class SendDataController extends BaseController{
     private final Logger logger = LoggerFactory.getLogger(SendDataController.class);
     private ObjectMapper objectMapper = new ObjectMapper();
-    private DHT11SensorReader sensor = new DHT11SensorReader();
+
+
+    @Value("${heating.additional.temp.sensor}")
+    protected String additionalSensorAddress;
+
+//    private DHT11SensorReader sensor = new DHT11SensorReader();
 
 
 
     @Scheduled(fixedRate = 300000)
     public void reportCurrentTime() throws JsonProcessingException {
-        this.sensor.setdTHPIN(7);
-        float[] readData = sensor.readData();
+//        this.sensor.setdTHPIN(7);
+//        float[] readData = sensor.readData();
+        TransportJson transportJson = new TransportJson();
 
-        String jsonString = objectMapper.writeValueAsString(new Report()
-                .setTemperature(String.valueOf(readData[0]))
-                .setHumidity(String.valueOf(readData[1]))
-                .setHeating(relayPin.isMode(PinMode.DIGITAL_OUTPUT)));
+//        String jsonString = objectMapper.writeValueAsString(transportJson
+//                .setTemperature(String.valueOf(readData[0]))
+//                .setHumidity(String.valueOf(readData[1]))
+//                .setHeatingStatus(relayPin.isMode(PinMode.DIGITAL_OUTPUT)));
 
-//        String jsonString = objectMapper.writeValueAsString(new Report()
-//                .setTemperature("34.6")
-//                .setHumidity("33")
-//                .setHeating(true));
 
+        if(additionalSensorAddress!=null){
+            String[] address = additionalSensorAddress.split(",");
+            logger.debug("Additional sensors []", additionalSensorAddress);
+            for (String addres : address) {
+                RestTemplate restTemplate = new RestTemplate();
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_JSON);
+                HttpEntity<String> entity = new HttpEntity<>(headers);
+                ResponseEntity<ArduinoTemperatureSensor> responseEntity =
+                        restTemplate.exchange(addres , HttpMethod.GET, entity, ArduinoTemperatureSensor.class);
+                AdditionalSensor additionalSensor = new AdditionalSensor().setHumidity(String.valueOf(responseEntity.getBody().getHumidity()))
+                        .setTemperature(String.valueOf(responseEntity.getBody().getTemperatureCel()));
+                transportJson.getSensorEntityList().add(additionalSensor);
+            }
+        }
+        String jsonString = objectMapper.writeValueAsString(transportJson
+                .setTemperature("34.6")
+                .setHumidity("33")
+                .setHeatingStatus(true));
 
         try {
             RestTemplate restTemplate = new RestTemplate();

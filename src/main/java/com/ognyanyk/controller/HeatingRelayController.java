@@ -27,20 +27,20 @@ public class HeatingRelayController extends BaseController {
         Long heatingDurationInSeconds = config.getLong("heatingDurationInSeconds", 0l) * 1000;
         Long periodInSeconds = config.getLong("periodInSeconds", 0l) * 1000;
 
-        if (heatingStatus) {
-            relayPin.setMode(PinMode.DIGITAL_OUTPUT);
-        } else if (enablePeriodicalHeating && isPeriodicalWasOn && (new Date()).getTime() - (lastChangeTime + heatingDurationInSeconds) > 0) {
-            relayPin.setMode(PinMode.DIGITAL_INPUT);
-            config.setProperty("lastChangeTime", (new Date()).getTime());
-            config.setProperty("isPeriodicalWasOn", false);
-        } else if (enablePeriodicalHeating && !isPeriodicalWasOn && ((new Date()).getTime() - (lastChangeTime + periodInSeconds)) > 0) {
-            relayPin.setMode(PinMode.DIGITAL_OUTPUT);
-            config.setProperty("lastChangeTime", (new Date()).getTime());
-            config.setProperty("isPeriodicalWasOn", true);
-        } else if (!enablePeriodicalHeating && !heatingStatus) {
-            relayPin.setMode(PinMode.DIGITAL_INPUT);
-        }
-        config.save(new File("config.properties"));
-        logger.info("Sync. heating status [{}]", relayPin.isMode(PinMode.DIGITAL_OUTPUT));
+//        if (heatingStatus) {
+//            relayPin.setMode(PinMode.DIGITAL_OUTPUT);
+//        } else if (enablePeriodicalHeating && isPeriodicalWasOn && (new Date()).getTime() - (lastChangeTime + heatingDurationInSeconds) > 0) {
+//            relayPin.setMode(PinMode.DIGITAL_INPUT);
+//            config.setProperty("lastChangeTime", (new Date()).getTime());
+//            config.setProperty("isPeriodicalWasOn", false);
+//        } else if (enablePeriodicalHeating && !isPeriodicalWasOn && ((new Date()).getTime() - (lastChangeTime + periodInSeconds)) > 0) {
+//            relayPin.setMode(PinMode.DIGITAL_OUTPUT);
+//            config.setProperty("lastChangeTime", (new Date()).getTime());
+//            config.setProperty("isPeriodicalWasOn", true);
+//        } else if (!enablePeriodicalHeating && !heatingStatus) {
+//            relayPin.setMode(PinMode.DIGITAL_INPUT);
+//        }
+//        config.save(new File("config.properties"));
+//        logger.info("Sync. heating status [{}]", relayPin.isMode(PinMode.DIGITAL_OUTPUT));
     }
 }

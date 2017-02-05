@@ -17,8 +17,8 @@ abstract class BaseController {
     @Value("${heating.server.host}")
     protected String baseHost;
     protected final PropertiesConfiguration config = new PropertiesConfiguration();
-    final GpioController gpio = GpioFactory.getInstance();
-    GpioPinDigitalMultipurpose relayPin = gpio.provisionDigitalMultipurposePin(RaspiPin.GPIO_00, PinMode.DIGITAL_INPUT);
+//    final GpioController gpio = GpioFactory.getInstance();
+//    GpioPinDigitalMultipurpose relayPin = gpio.provisionDigitalMultipurposePin(RaspiPin.GPIO_00, PinMode.DIGITAL_INPUT);
 
 
     @PostConstruct
