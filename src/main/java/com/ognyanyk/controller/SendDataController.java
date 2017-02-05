@@ -46,15 +46,19 @@ public class SendDataController extends BaseController{
             String[] address = additionalSensorAddress.split(",");
             logger.debug("Additional sensors []", additionalSensorAddress);
             for (String addres : address) {
-                RestTemplate restTemplate = new RestTemplate();
-                HttpHeaders headers = new HttpHeaders();
-                headers.setContentType(MediaType.APPLICATION_JSON);
-                HttpEntity<String> entity = new HttpEntity<>(headers);
-                ResponseEntity<ArduinoTemperatureSensor> responseEntity =
-                        restTemplate.exchange(addres , HttpMethod.GET, entity, ArduinoTemperatureSensor.class);
-                AdditionalSensor additionalSensor = new AdditionalSensor().setHumidity(String.valueOf(responseEntity.getBody().getHumidity()))
-                        .setTemperature(String.valueOf(responseEntity.getBody().getTemperatureCel()));
-                transportJson.getSensorEntityList().add(additionalSensor);
+                try {
+                    RestTemplate restTemplate = new RestTemplate();
+                    HttpHeaders headers = new HttpHeaders();
+                    headers.setContentType(MediaType.APPLICATION_JSON);
+                    HttpEntity<String> entity = new HttpEntity<>(headers);
+                    ResponseEntity<ArduinoTemperatureSensor> responseEntity =
+                            restTemplate.exchange(addres, HttpMethod.GET, entity, ArduinoTemperatureSensor.class);
+                    AdditionalSensor additionalSensor = new AdditionalSensor().setHumidity(String.valueOf(responseEntity.getBody().getHumidity()))
+                            .setTemperature(String.valueOf(responseEntity.getBody().getTemperatureCel()));
+                    transportJson.getSensorEntityList().add(additionalSensor);
+                } catch (Exception ex){
+                    logger.error("Can't read sensor []", addres);
+                }
             }
         }
         String jsonString = objectMapper.writeValueAsString(transportJson
