@@ -1,11 +1,13 @@
 package com.ognyanyk.controller;
 
 import com.pi4j.io.gpio.*;
+import com.pi4j.io.gpio.exception.GpioPinExistsException;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.springframework.beans.factory.annotation.Value;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.io.File;
 import java.util.Date;
 
@@ -16,13 +18,25 @@ abstract class BaseController {
 
     @Value("${heating.server.host}")
     protected String baseHost;
-    protected final PropertiesConfiguration config = new PropertiesConfiguration();
-//    final GpioController gpio = GpioFactory.getInstance();
-//    GpioPinDigitalMultipurpose relayPin = gpio.provisionDigitalMultipurposePin(RaspiPin.GPIO_00, PinMode.DIGITAL_INPUT);
-
+    protected final static PropertiesConfiguration config = new PropertiesConfiguration();
+    protected static final GpioController gpio = GpioFactory.getInstance();
+    protected static GpioPin gpioPin;
 
     @PostConstruct
     private void init() throws ConfigurationException {
         config.load(new File("config.properties"));
+    }
+
+    protected static synchronized GpioPin provisionGPIO() {
+        if (gpioPin != null) {
+            return gpioPin;
+        }
+        gpioPin = gpio.provisionDigitalMultipurposePin(RaspiPin.GPIO_00, PinMode.DIGITAL_INPUT);
+        return gpioPin;
+    }
+    @PreDestroy
+    private void destroy(){
+        gpio.shutdown();
+        gpio.unprovisionPin(gpioPin);
     }
 }

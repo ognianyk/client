@@ -5,6 +5,7 @@ import org.apache.commons.configuration.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.util.Date;
@@ -12,6 +13,7 @@ import java.util.Date;
 /**
  * Created by pavelognianyk on 2/1/17.
  */
+@Component
 public class HeatingRelayController extends BaseController {
     private final Logger logger = LoggerFactory.getLogger(HeatingRelayController.class);
 
@@ -19,7 +21,7 @@ public class HeatingRelayController extends BaseController {
 
     @Scheduled(fixedRate = 1000)
     public void updateHeating() throws ConfigurationException {
-
+        GpioPin relayPin = provisionGPIO();//provisionPin(RaspiPin.GPIO_01, PinMode.DIGITAL_INPUT);//provisionDigitalMultipurposePin(RaspiPin.GPIO_00, PinMode.DIGITAL_INPUT);
         boolean heatingStatus = config.getBoolean("heatingStatus", false);
         boolean enablePeriodicalHeating = config.getBoolean("enablePeriodicalHeating", false);
         boolean isPeriodicalWasOn = config.getBoolean("isPeriodicalWasOn", false);
@@ -27,20 +29,20 @@ public class HeatingRelayController extends BaseController {
         Long heatingDurationInSeconds = config.getLong("heatingDurationInSeconds", 0l) * 1000;
         Long periodInSeconds = config.getLong("periodInSeconds", 0l) * 1000;
 
-//        if (heatingStatus) {
-//            relayPin.setMode(PinMode.DIGITAL_OUTPUT);
-//        } else if (enablePeriodicalHeating && isPeriodicalWasOn && (new Date()).getTime() - (lastChangeTime + heatingDurationInSeconds) > 0) {
-//            relayPin.setMode(PinMode.DIGITAL_INPUT);
-//            config.setProperty("lastChangeTime", (new Date()).getTime());
-//            config.setProperty("isPeriodicalWasOn", false);
-//        } else if (enablePeriodicalHeating && !isPeriodicalWasOn && ((new Date()).getTime() - (lastChangeTime + periodInSeconds)) > 0) {
-//            relayPin.setMode(PinMode.DIGITAL_OUTPUT);
-//            config.setProperty("lastChangeTime", (new Date()).getTime());
-//            config.setProperty("isPeriodicalWasOn", true);
-//        } else if (!enablePeriodicalHeating && !heatingStatus) {
-//            relayPin.setMode(PinMode.DIGITAL_INPUT);
-//        }
+        if (heatingStatus) {
+            relayPin.setMode(PinMode.DIGITAL_OUTPUT);
+        } else if (enablePeriodicalHeating && isPeriodicalWasOn && (new Date()).getTime() - (lastChangeTime + heatingDurationInSeconds) > 0) {
+            relayPin.setMode(PinMode.DIGITAL_INPUT);
+            config.setProperty("lastChangeTime", (new Date()).getTime());
+            config.setProperty("isPeriodicalWasOn", false);
+        } else if (enablePeriodicalHeating && !isPeriodicalWasOn && ((new Date()).getTime() - (lastChangeTime + periodInSeconds)) > 0) {
+            relayPin.setMode(PinMode.DIGITAL_OUTPUT);
+            config.setProperty("lastChangeTime", (new Date()).getTime());
+            config.setProperty("isPeriodicalWasOn", true);
+        } else if (!enablePeriodicalHeating && !heatingStatus) {
+            relayPin.setMode(PinMode.DIGITAL_INPUT);
+        }
 //        config.save(new File("config.properties"));
-//        logger.info("Sync. heating status [{}]", relayPin.isMode(PinMode.DIGITAL_OUTPUT));
+        logger.info("Sync. heating status [{}]", relayPin.isMode(PinMode.DIGITAL_OUTPUT));
     }
 }
